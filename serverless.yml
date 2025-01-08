@@ -1,0 +1,57 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: sergioradigales32
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: blog-${self:provider.stage}
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: blog-${self:provider.stage}
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-west-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    DYNAMODB_USER_TABLE: ${self:custom.userTableName}
+    JWT_SECRET: ${env:JWT_SECRET}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}"
+
+custom:
+  # functionsBasePath: dist/app
+  userTableName: userTable-${self:service}
+
+functions:
+  createUser:
+    handler: dist/app/user/create.handle
+    events:
+      - httpApi:
+          path: /user
+          method: post
+  findUserById:
+    handler: user/find-by-id.handle
+    events:
+      - httpApi:
+          path: /user/{id}
+          method: get
+
+resources:
+  Resources:
+    CustomerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        TableName: ${self:custom.userTableName}
