@@ -36,11 +36,13 @@ functions:
           path: /user
           method: post
   findUserById:
-    handler: user/find-by-id.handle
+    handler: dist/app/user/find-by-id.handle
     events:
       - httpApi:
           path: /user/{id}
           method: get
+  generateToken:
+    handler: dist/app/auth/generate-token.handle
 
 resources:
   Resources:

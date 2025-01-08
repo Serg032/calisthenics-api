@@ -1,4 +1,4 @@
-export interface SignInput {
+export interface GenerateTokenInput {
   email: string;
   password: string;
 }

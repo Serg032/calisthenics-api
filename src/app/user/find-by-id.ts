@@ -7,12 +7,18 @@ const repository = new ProductionRepository();
 export const handle = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  if (!event.body) {
-    throw new Error("Missing body");
-  }
-  const body = JSON.parse(event.body);
+  const userId = event.pathParameters?.id;
 
-  const userById = await handler(repository, body.id);
+  if (!userId) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Missing id" }),
+    };
+  }
+
+  console.log("event", event);
+
+  const userById = await handler(repository, userId);
 
   if (!userById) {
     return {
