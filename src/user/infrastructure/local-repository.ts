@@ -42,4 +42,25 @@ export class LocalRepository implements Repository {
 
     return jwt.sign(input, jwtSecret, { expiresIn: "1h" });
   }
+
+  async authMiddleware(token: string): Promise<boolean> {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
+
+    const verifiedToken = jwt.verify(token, jwtSecret) as GenerateTokenInput;
+
+    const userByTokenPayload = Array.from(this.users).find(
+      (user) =>
+        user.email === verifiedToken.email &&
+        user.password === verifiedToken.password
+    );
+
+    if (!userByTokenPayload) {
+      return false;
+    }
+
+    return verifiedToken ? true : false;
+  }
 }

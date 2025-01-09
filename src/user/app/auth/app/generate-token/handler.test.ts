@@ -2,7 +2,7 @@ import { CreateCommand } from "../../../../domain";
 import { LocalRepository } from "../../../../infrastructure/local-repository";
 import { handler as createUserHandler } from "./../../../create/handler";
 import * as jwt from "jsonwebtoken";
-import handler from "./handler";
+import { handler } from "./handler";
 
 describe("When generating a token", () => {
   const repository = new LocalRepository();

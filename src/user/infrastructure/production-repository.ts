@@ -82,4 +82,32 @@ export class ProductionRepository extends Repository {
 
     return jwt.sign(input, jwtSecret, { expiresIn: "1h" });
   }
+
+  async authMiddleware(token: string): Promise<boolean> {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
+
+    const verifiedToken = jwt.verify(token, jwtSecret) as GenerateTokenInput;
+
+    const userByInputObject = await this.dynamoDb
+      .scan({
+        TableName: this.tableName,
+        FilterExpression: "email = :email AND password = :password",
+        ExpressionAttributeValues: {
+          ":email": verifiedToken.email,
+          ":password": verifiedToken.password,
+        },
+      })
+      .promise();
+
+    const user = userByInputObject.Items?.[0] as User | undefined;
+
+    if (!user) {
+      return false;
+    }
+
+    return verifiedToken ? true : false;
+  }
 }
