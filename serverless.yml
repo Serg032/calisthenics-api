@@ -41,8 +41,12 @@ functions:
       - httpApi:
           path: /user/{id}
           method: get
-  generateToken:
-    handler: dist/app/auth/generate-token.handle
+  signIn:
+    handler: dist/app/user/sign-in.handle
+    events:
+      - httpApi:
+          path: /user/sign-in
+          method: post
 
 resources:
   Resources:

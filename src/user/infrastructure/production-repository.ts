@@ -2,7 +2,12 @@ import { randomUUID } from "crypto";
 import { CreateCommand, User } from "../domain";
 import { Repository } from "../domain/repository-interface";
 import * as AWS from "aws-sdk";
-import { GenerateTokenInput } from "../app/auth/domain";
+import {
+  GenerateTokenInput,
+  SignInFailedResponse,
+  SignInPayload,
+  SignInSuccessfulResponse,
+} from "../app/auth/domain";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -109,5 +114,38 @@ export class ProductionRepository extends Repository {
     }
 
     return verifiedToken ? true : false;
+  }
+
+  async signIn(
+    payload: SignInPayload
+  ): Promise<SignInSuccessfulResponse | SignInFailedResponse> {
+    const userByPayloadObject = await this.dynamoDb
+      .scan({
+        TableName: this.tableName,
+        FilterExpression: "email = :email AND password = :password",
+        ExpressionAttributeValues: {
+          ":email": payload.email,
+          ":password": payload.password,
+        },
+      })
+      .promise();
+
+    const user = userByPayloadObject.Items?.[0] as User | undefined;
+
+    if (!user) {
+      return {
+        error: `User not found by ${payload.email} and ${payload.password}`,
+      };
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
+
+    return {
+      token: jwt.sign(payload, jwtSecret, { expiresIn: "1h" }),
+    };
   }
 }

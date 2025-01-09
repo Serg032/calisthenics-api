@@ -1,7 +1,12 @@
 import { randomUUID } from "crypto";
 import { CreateCommand, User } from "../domain";
 import { Repository } from "../domain/repository-interface";
-import { GenerateTokenInput } from "../app/auth/domain";
+import {
+  GenerateTokenInput,
+  SignInFailedResponse,
+  SignInPayload,
+  SignInSuccessfulResponse,
+} from "../app/auth/domain";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -62,5 +67,30 @@ export class LocalRepository implements Repository {
     }
 
     return verifiedToken ? true : false;
+  }
+
+  async signIn(
+    payload: SignInPayload
+  ): Promise<SignInSuccessfulResponse | SignInFailedResponse> {
+    const userByPayload = Array.from(this.users).find(
+      (user) =>
+        user.email === payload.email && user.password === payload.password
+    );
+
+    if (!userByPayload) {
+      return {
+        error: `User not found by ${payload.email} and ${payload.password}`,
+      };
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
+
+    return {
+      token: jwt.sign(payload, jwtSecret, { expiresIn: "1h" }),
+    };
   }
 }
