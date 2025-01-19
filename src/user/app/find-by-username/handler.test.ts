@@ -3,14 +3,14 @@ import { LocalRepository } from "../../infrastructure/local-repository";
 import { handler as createHandler } from "../create/handler";
 import { handler } from "./handler";
 
-describe("When asking for a user by an email", () => {
+describe("When asking for a user by an username", () => {
   const repository = new LocalRepository();
-  const email = "johndoe@gmail.com";
+  const username = "johnDoe";
   const createUserCommand: CreateCommand = {
     name: "John",
     surname: "Doe",
-    username: "johnDoe",
-    email,
+    username,
+    email: "johndoe@gmail.com",
     password: "test",
   };
 
@@ -19,13 +19,13 @@ describe("When asking for a user by an email", () => {
   });
 
   it("should return the user", async () => {
-    const userByEmail = await handler(repository, email);
+    const userByEmail = await handler(repository, username);
     expect(userByEmail).toBeDefined();
-    expect(userByEmail?.email).toBe(email);
+    expect(userByEmail?.username).toBe(username);
   });
 
   it("should return null if the user doesn't exist", async () => {
-    const userByEmail = await handler(repository, "none@gmail.com");
+    const userByEmail = await handler(repository, "none");
     expect(userByEmail).toBeNull();
   });
 });

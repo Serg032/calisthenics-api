@@ -1,5 +1,6 @@
 import { handler } from "../../user/app/create/handler";
 import { handler as findUserByEmail } from "../../user/app/find-by-email/handler";
+import { handler as findUserByUsername } from "../../user/app/find-by-username/handler";
 import { CreateCommand } from "../../user/domain";
 import { ProductionRepository } from "../../user/infrastructure/production-repository";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
@@ -33,22 +34,24 @@ export const handle = async (
       };
     }
 
-    try {
-      const userByEmail = await findUserByEmail(repository, body.email);
+    const userByEmail = await findUserByEmail(repository, body.email);
 
-      if (userByEmail) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            error: `User with email ${body.email} already exists`,
-          }),
-        };
-      }
-    } catch (error) {
+    if (userByEmail) {
       return {
         statusCode: 400,
         body: JSON.stringify({
-          error: `something went wronf ${error}`,
+          error: `User with email ${body.email} already exists`,
+        }),
+      };
+    }
+
+    const userByUserName = await findUserByUsername(repository, body.username);
+
+    if (userByUserName) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: `User with username ${body.username} already exists`,
         }),
       };
     }

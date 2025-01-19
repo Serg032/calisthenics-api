@@ -181,4 +181,23 @@ export class ProductionRepository extends Repository {
       throw new Error(`Failed to find user by username: ${error}`);
     }
   }
+
+  async findByUsername(username: string): Promise<User | null> {
+    try {
+      const result = await this.dynamoDb
+        .query({
+          TableName: this.tableName,
+          IndexName: "UsernameIndex", // Asegúrate de tener un índice secundario global para el email
+          KeyConditionExpression: "username = :username",
+          ExpressionAttributeValues: {
+            ":username": username,
+          },
+        })
+        .promise();
+
+      return result.Items?.[0] as User | null;
+    } catch (error) {
+      throw new Error(`Failed to find user by username: ${error}`);
+    }
+  }
 }
