@@ -148,4 +148,18 @@ export class ProductionRepository extends Repository {
       token: jwt.sign(payload, jwtSecret, { expiresIn: "1h" }),
     };
   }
+
+  async getAll(): Promise<User[]> {
+    try {
+      const result = await this.dynamoDb
+        .scan({
+          TableName: this.tableName,
+        })
+        .promise();
+
+      return result.Items as User[];
+    } catch (error) {
+      throw new Error(`Failed to get all users: ${error}`);
+    }
+  }
 }

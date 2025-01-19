@@ -93,4 +93,8 @@ export class LocalRepository implements Repository {
       token: jwt.sign(payload, jwtSecret, { expiresIn: "1h" }),
     };
   }
+
+  async getAll(): Promise<User[]> {
+    return Array.from(this.users);
+  }
 }

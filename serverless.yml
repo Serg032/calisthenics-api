@@ -1,9 +1,9 @@
 # "org" ensures this Service is used with the correct Serverless Framework Access Key.
 org: sergioradigales32
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
-app: blog-${self:provider.stage}
+app: smash-cloud-users
 # "service" is the name of this project. This will also be added to your AWS resource names.
-service: blog-${self:provider.stage}
+service: calisthenics-users
 
 provider:
   name: aws
@@ -25,7 +25,6 @@ provider:
       Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}"
 
 custom:
-  # functionsBasePath: dist/app
   userTableName: userTable-${self:service}
 
 functions:

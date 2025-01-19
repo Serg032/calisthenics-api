@@ -1,8 +1,6 @@
 import { Repository } from "../../../../domain/repository-interface";
 import {
-  SignInFailedResponse,
   SignInPayload,
-  SignInSuccessfulResponse,
 } from "../../domain";
 
 export const handler = async (

@@ -7,5 +7,3 @@ export const handler = async (
 ): Promise<User> => {
   return await repository.create(command);
 };
-
-handler;

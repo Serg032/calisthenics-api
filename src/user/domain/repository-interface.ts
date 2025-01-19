@@ -14,4 +14,5 @@ export abstract class Repository {
   abstract signIn(
     payload: SignInPayload
   ): Promise<SignInSuccessfulResponse | SignInFailedResponse>;
+  abstract getAll(): Promise<User[]>;
 }
