@@ -3,7 +3,7 @@ org: sergioradigales32
 # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
 app: smash-cloud-users
 # "service" is the name of this project. This will also be added to your AWS resource names.
-service: calisthenics-users
+service: calisthenics-users-${opt:stage, 'dev'}
 
 provider:
   name: aws
@@ -22,10 +22,12 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}"
+      Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.userTableName}/index/*"
 
 custom:
-  userTableName: userTable-${self:service}
+  userTableName: user-${self:service}
 
 functions:
   createUser:
@@ -55,8 +57,25 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: UsernameIndex
+            KeySchema:
+              - AttributeName: username
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
         TableName: ${self:custom.userTableName}

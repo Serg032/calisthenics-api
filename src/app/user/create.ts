@@ -1,4 +1,5 @@
 import { handler } from "../../user/app/create/handler";
+import { handler as findUserByEmail } from "../../user/app/find-by-email/handler";
 import { CreateCommand } from "../../user/domain";
 import { ProductionRepository } from "../../user/infrastructure/production-repository";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
@@ -16,7 +17,9 @@ export const handle = async (
         body: JSON.stringify({ message: "Missing body" }),
       };
     }
+
     const body = JSON.parse(event.body) as CreateCommand;
+
     if (
       !body.email ||
       !body.password ||
@@ -29,6 +32,27 @@ export const handle = async (
         body: JSON.stringify({ message: "Missing required fields" }),
       };
     }
+
+    try {
+      const userByEmail = await findUserByEmail(repository, body.email);
+
+      if (userByEmail) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            error: `User with email ${body.email} already exists`,
+          }),
+        };
+      }
+    } catch (error) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: `something went wronf ${error}`,
+        }),
+      };
+    }
+
     const createdUser = await handler(repository, body);
 
     return {
@@ -39,7 +63,7 @@ export const handle = async (
     return {
       statusCode: 500,
       body: JSON.stringify({
-        error,
+        error: `Some ${error}`,
       }),
     };
   }

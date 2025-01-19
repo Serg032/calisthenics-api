@@ -97,4 +97,10 @@ export class LocalRepository implements Repository {
   async getAll(): Promise<User[]> {
     return Array.from(this.users);
   }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const users = Array.from(this.users);
+    const userByEmail = users.find((user) => user.email === email);
+    return userByEmail ? userByEmail : null;
+  }
 }

@@ -15,4 +15,5 @@ export abstract class Repository {
     payload: SignInPayload
   ): Promise<SignInSuccessfulResponse | SignInFailedResponse>;
   abstract getAll(): Promise<User[]>;
+  abstract findByEmail(email: string): Promise<User | null>;
 }
