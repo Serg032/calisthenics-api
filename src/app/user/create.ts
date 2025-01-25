@@ -11,7 +11,6 @@ export const handle = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log("Create User!");
     if (!event.body) {
       return {
         statusCode: 400,
