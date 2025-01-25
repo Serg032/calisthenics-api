@@ -10,11 +10,13 @@ import {
 } from "../app/auth/domain";
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
+import * as bycript from "bcryptjs";
 dotenv.config();
 
 export class ProductionRepository extends Repository {
   private tableName: string;
   private dynamoDb: AWS.DynamoDB.DocumentClient;
+  private saltRounds: number;
 
   constructor() {
     super();
@@ -22,11 +24,25 @@ export class ProductionRepository extends Repository {
       throw new Error("DYNAMODB_USER_TABLE environment variable is not set");
     }
 
+    if (!process.env.SALT_ROUNDS) {
+      throw new Error("SATL_ROUNDS environment variable is not set");
+    }
+
     this.tableName = process.env.DYNAMODB_USER_TABLE;
 
     this.dynamoDb = new AWS.DynamoDB.DocumentClient();
+
+    this.saltRounds = parseInt(process.env.SALT_ROUNDS);
   }
+
   async create(command: CreateCommand): Promise<User> {
+    const hashedPassword = await bycript.hash(
+      command.password,
+      this.saltRounds
+    );
+
+    command.password = hashedPassword;
+
     try {
       const marshalledUser: User = {
         id: randomUUID(),

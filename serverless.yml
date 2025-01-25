@@ -5,6 +5,11 @@ app: smash-cloud-users
 # "service" is the name of this project. This will also be added to your AWS resource names.
 service: calisthenics-users-${opt:stage, 'dev'}
 
+plugins:
+  - serverless-dotenv-plugin
+
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs20.x
@@ -13,6 +18,7 @@ provider:
   environment:
     DYNAMODB_USER_TABLE: ${self:custom.userTableName}
     JWT_SECRET: ${env:JWT_SECRET}
+    SALT_ROUNDS: ${env:SALT_ROUNDS}
   iamRoleStatements:
     - Effect: Allow
       Action:
