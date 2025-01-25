@@ -34,6 +34,14 @@ export const handle = async (
       };
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Invalid email format" }),
+      };
+    }
+
     const userByEmail = await findUserByEmail(repository, body.email);
 
     if (userByEmail) {
